@@ -75,6 +75,10 @@ export default class Three {
         this.hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
         this.scene.add(this.directionalLight)
         this.scene.add(this.hemisphereLight)
+
+        this.mouseLight = new THREE.PointLight('#ffffff', 20, 20) // 顏色、強度、距離
+        this.mouseLight.position.set(0, 0, 2) // 初始位置
+        this.scene.add(this.mouseLight)
     }
 
     /**
@@ -97,6 +101,7 @@ export default class Three {
 
         this.renderer.setSize(this.sizes.width, this.sizes.height)
         this.renderer.setPixelRatio(this.sizes.pixelRatio)
+        // this.renderer.setClearAlpha(0)
         this.renderer.setClearColor('#dedede')
     }
 
@@ -212,19 +217,16 @@ export default class Three {
 
             this.letterM.materials = [
                 // Material 01
-                new THREE.MeshStandardMaterial({
-                    color: 0xcccccc,
-                    roughness: 1.0,
-                    metalness: 0.2,
+                new THREE.MeshPhysicalMaterial({
+                    color: 0x222222,
+                    roughness: 0.1,
+                    clearcoat: 1,
+                    clearcoatRoughness: 0.1,
+                    metalness: 1.0,
+                    transmission: 1,
+                    thickness: 0.5,
                     envMap: this.environmentMap,
-                    envMapIntensity: 0.5,
-                    normalMap: this.frostedGlassNormalTexture,
-                    normalScale: new THREE.Vector2(3.0, 3.0),
-                    bumpMap: this.frostedGlassNormalTexture,
-                    bumpScale: 5.0,
-                    map: this.noiseTexture,
-                    metalnessMap: this.noiseTexture,
-
+                    envMapIntensity: 1,
                 }),
                 // Material 02
                 new THREE.MeshPhysicalMaterial({
@@ -237,16 +239,19 @@ export default class Three {
                     envMapIntensity: 1
                 }),
                 // Material 03
-                new THREE.MeshPhysicalMaterial({
-                    color: 0x222222,
-                    roughness: 0.1,
-                    clearcoat: 1,
-                    clearcoatRoughness: 0.1,
-                    metalness: 1.0,
-                    transmission: 1,
-                    thickness: 0.5,
+                new THREE.MeshStandardMaterial({
+                    color: 0xbbbbbb,
+                    roughness: 1.0,
+                    metalness: 0.2,
                     envMap: this.environmentMap,
-                    envMapIntensity: 1,
+                    envMapIntensity: 0.5,
+                    normalMap: this.frostedGlassNormalTexture,
+                    normalScale: new THREE.Vector2(3.0, 3.0),
+                    bumpMap: this.frostedGlassNormalTexture,
+                    bumpScale: 5.0,
+                    map: this.noiseTexture,
+                    metalnessMap: this.noiseTexture,
+
                 })
             ];
 
@@ -262,6 +267,17 @@ export default class Three {
 
         this.animate()
 
+        // Update mouse light position
+        if (this.mouseLight) {
+            const vector = new THREE.Vector3(this.mouse.x, this.mouse.y, 0.5)
+            vector.unproject(this.camera)
+            vector.sub(this.camera.position).normalize()
+            const distance = (0 - this.camera.position.z) / vector.z
+            const pos = this.camera.position.clone().add(vector.multiplyScalar(distance))
+
+            this.mouseLight.position.copy(pos)
+            this.mouseLight.position.z = 3
+        }
         // Render normal scene
         this.renderer.render(this.scene, this.camera)
 
@@ -308,9 +324,10 @@ export default class Three {
     animate() {
         if (!this.letterM.mesh) return
         this.letterM.mesh.rotation.z += this.rotationZSpeed
+        const offsetStrength = 0.2
+        this.letterM.mesh.position.x = -this.mouse.x * offsetStrength
+        this.letterM.mesh.position.y = -this.mouse.y * offsetStrength
     }
-
-
 
     onEnter() {
         gsap.to(this, {
@@ -318,6 +335,9 @@ export default class Three {
             duration: 0.8,
             ease: 'power2.out'
         })
+        // Cursor 變大
+        const cursor = document.querySelector('.custom-cursor')
+        if (cursor) cursor.classList.add('hover')
     }
 
     onLeave() {
@@ -326,6 +346,9 @@ export default class Three {
             duration: 0.8,
             ease: 'power2.out'
         })
+        // Cursor 變回原本大小
+        const cursor = document.querySelector('.custom-cursor')
+        if (cursor) cursor.classList.remove('hover')
     }
 
     onWheel(event) {
@@ -334,19 +357,18 @@ export default class Three {
             deltaX: event.deltaX,
             direction: event.deltaY > 0 ? '向下' : '向上'
         })
-        this.swtichAnimation()
-
+        this.switchAnimation()
     }
 
     onClick(event, intersect) {
         console.log('點擊 Letter M')
-        this.swtichAnimation()
+        this.switchAnimation()
     }
 
     /**
     * Material
     */
-    swtichMaterial() {
+    switchMaterial() {
         if (!this.letterM.mesh || !this.letterM.materials) return
         this.letterM.currentMaterialIndex = (this.letterM.currentMaterialIndex + 1) % this.letterM.materials.length
         this.letterM.mesh.material = this.letterM.materials[this.letterM.currentMaterialIndex]
@@ -354,7 +376,7 @@ export default class Three {
         console.log(`切換到材質 ${this.letterM.currentMaterialIndex + 1}/${this.letterM.materials.length}`)
     }
 
-    swtichAnimation() {
+    switchAnimation() {
         if (!this.letterM.mesh || this.isSwitching) return
 
         const targetRotation = this.letterM.mesh.rotation.x + Math.PI * 2.0
@@ -367,7 +389,7 @@ export default class Three {
                 duration: 0.5,
                 ease: 'power2.out',
                 onStart: () => {
-                    this.swtichMaterial()
+                    this.switchMaterial()
                 },
                 onComplete: () => {
                     this.isSwitching = false
@@ -379,7 +401,9 @@ export default class Three {
                 z: 0,
                 duration: 0.5,
                 ease: 'power2.inOut',
+                overwrite: 'auto'
             }, "<")
     }
 
 }
+
