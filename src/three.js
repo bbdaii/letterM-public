@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'
@@ -56,13 +55,6 @@ export default class Three {
         this.camera = new THREE.PerspectiveCamera(35, this.sizes.width / this.sizes.height, 0.1, 100)
         this.camera.position.set(0, 0, 8 * 2)
         this.scene.add(this.camera)
-
-        // Controls
-        this.controls = new OrbitControls(this.camera, this.canvas)
-        this.controls.enableDamping = true
-        this.controls.enablePan = false
-        this.controls.enableZoom = false
-        this.controls.enabled = false
     }
 
 
@@ -144,17 +136,6 @@ export default class Three {
             this.onWheel(event)
         }, { passive: false })
 
-        // 滑鼠點擊事件
-        window.addEventListener('click', (event) => {
-            if (!this.letterM.mesh) return
-
-            this.raycaster.setFromCamera(this.mouse, this.camera)
-            const intersects = this.raycaster.intersectObject(this.letterM.mesh)
-
-            if (intersects.length > 0) {
-                this.onClick(event, intersects[0])
-            }
-        })
     }
 
 
@@ -262,8 +243,6 @@ export default class Three {
 
 
     tick() {
-        // Update controls
-        this.controls.update()
 
         this.animate()
 
@@ -335,7 +314,6 @@ export default class Three {
             duration: 0.8,
             ease: 'power2.out'
         })
-        // Cursor 變大
         const cursor = document.querySelector('.custom-cursor')
         if (cursor) cursor.classList.add('hover')
     }
@@ -346,22 +324,11 @@ export default class Three {
             duration: 0.8,
             ease: 'power2.out'
         })
-        // Cursor 變回原本大小
         const cursor = document.querySelector('.custom-cursor')
         if (cursor) cursor.classList.remove('hover')
     }
 
     onWheel(event) {
-        console.log('滑鼠在 Letter M 上滾動', {
-            deltaY: event.deltaY,
-            deltaX: event.deltaX,
-            direction: event.deltaY > 0 ? '向下' : '向上'
-        })
-        this.switchAnimation()
-    }
-
-    onClick(event, intersect) {
-        console.log('點擊 Letter M')
         this.switchAnimation()
     }
 
