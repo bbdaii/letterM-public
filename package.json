@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://bbdai.github.io/09-letter-m/",
+  "homepage": "https://bbdai.github.io/letterM/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
