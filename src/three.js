@@ -165,16 +165,16 @@ export default class Three {
         const textureLoader = new THREE.TextureLoader()
 
         try {
-            this.noiseTexture = await textureLoader.loadAsync('/texture/noise.webp')
+            this.noiseTexture = await textureLoader.loadAsync('./texture/noise.webp')
             this.noiseTexture.wrapS = THREE.RepeatWrapping
             this.noiseTexture.wrapT = THREE.RepeatWrapping
             this.noiseTexture.colorSpace = THREE.SRGBColorSpace
             this.noiseTexture.repeat.set(20, 20)
-            this.noiseLightTexture = await textureLoader.loadAsync('/texture/noise-light.webp')
-            this.steelNormalTexture = await textureLoader.loadAsync('/texture/steel-normal.webp')
-            this.frostedNormalTexture = await textureLoader.loadAsync('/texture/frosted-normal.webp')
-            this.frostedGlassNormalTexture = await textureLoader.loadAsync('/texture/frosted-glass-normal.webp')
-            this.marbleTexture = await textureLoader.loadAsync('/texture/marble.webp')
+            this.noiseLightTexture = await textureLoader.loadAsync('./texture/noise-light.webp')
+            this.steelNormalTexture = await textureLoader.loadAsync('./texture/steel-normal.webp')
+            this.frostedNormalTexture = await textureLoader.loadAsync('./texture/frosted-normal.webp')
+            this.frostedGlassNormalTexture = await textureLoader.loadAsync('./texture/frosted-glass-normal.webp')
+            this.marbleTexture = await textureLoader.loadAsync('./texture/marble.webp')
 
             console.log('紋理載入完成')
         } catch (error) {
@@ -189,7 +189,7 @@ export default class Three {
         const rgbeLoader = new RGBELoader()
 
         try {
-            const environmentMap = await rgbeLoader.loadAsync('/warehouse.hdr')
+            const environmentMap = await rgbeLoader.loadAsync('./warehouse.hdr')
             environmentMap.mapping = THREE.EquirectangularReflectionMapping
 
             this.scene.environment = environmentMap
@@ -208,9 +208,9 @@ export default class Three {
     async setLoader() {
         this.loader = new GLTFLoader();
         this.dracoLoader = new DRACOLoader();
-        this.dracoLoader.setDecoderPath('/draco/');
+        this.dracoLoader.setDecoderPath('./draco/');
         this.loader.setDRACOLoader(this.dracoLoader);
-        const gltf = await this.loader.loadAsync('/letter_m1.glb');
+        const gltf = await this.loader.loadAsync('./letter_m1.glb');
 
         if (gltf.scene?.children?.length > 0) {
             this.letterM.geometry = gltf.scene.children[0].geometry;
